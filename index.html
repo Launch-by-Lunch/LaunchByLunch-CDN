@@ -147,6 +147,36 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
+        /* Custom dropdown styling */
+        #folderSelect {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.75rem 2.5rem 0.75rem 1rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            min-width: 200px;
+            border-radius: 0.375rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba(255,255,255,0.7)' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px 12px;
+        }
+
+        #folderSelect:focus {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        #folderSelect option {
+            background-color: #3d214f;
+            color: white;
+            padding: 0.5rem;
+        }
+
         .btn-primary {
             background-color: var(--secondary-purple);
             border-color: var(--secondary-purple);
@@ -252,11 +282,16 @@
 
         <div class="container py-4">
             <div class="search-container mb-4">
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="bi bi-search"></i>
-                    </span>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search files...">
+                <div class="d-flex gap-3">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search files...">
+                    </div>
+                    <select id="folderSelect" class="form-select" style="width: auto;">
+                        <option value="">All Folders</option>
+                    </select>
                 </div>
             </div>
 
@@ -353,6 +388,7 @@
         const repo = 'LaunchByLunch-CDN';
         const CDN_BASE_URL = 'https://cdn.launchbylunch.co/';
         let allFiles = [];
+        let folderStructure = new Set();
 
         async function fetchFolderContents(path = '') {
             try {
@@ -447,16 +483,37 @@
             `;
         }
 
-        function filterFiles(files, searchTerm) {
-            return files.filter(file => 
-                file.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                file.path.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+        function updateFolderDropdown() {
+            const folderSelect = document.getElementById('folderSelect');
+            folderSelect.innerHTML = '<option value="">All Folders</option>';
+            
+            // Sort folders alphabetically
+            const sortedFolders = Array.from(folderStructure).sort();
+            
+            sortedFolders.forEach(folder => {
+                const option = document.createElement('option');
+                option.value = folder;
+                option.textContent = folder;
+                folderSelect.appendChild(option);
+            });
+        }
+
+        function filterFiles(files, searchTerm = '', selectedFolder = '') {
+            return files.filter(file => {
+                const matchesSearch = file.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    file.path.toLowerCase().includes(searchTerm.toLowerCase());
+                
+                const folderPath = file.path.split('/').slice(0, -1).join('/');
+                const matchesFolder = !selectedFolder || folderPath === selectedFolder;
+                
+                return matchesSearch && matchesFolder;
+            });
         }
 
         function renderFiles(files, searchTerm = '') {
             const fileList = document.getElementById('file-list');
-            const filteredFiles = filterFiles(files, searchTerm);
+            const selectedFolder = document.getElementById('folderSelect').value;
+            const filteredFiles = filterFiles(files, searchTerm, selectedFolder);
             
             if (filteredFiles.length === 0) {
                 fileList.innerHTML = `
@@ -476,6 +533,11 @@
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('input', (e) => {
             renderFiles(allFiles, e.target.value);
+        });
+
+        // Initialize folder select
+        document.getElementById('folderSelect').addEventListener('change', () => {
+            renderFiles(allFiles, searchInput.value);
         });
 
         // Initialize modal
@@ -539,6 +601,14 @@
         fetchFolderContents()
             .then(files => {
                 allFiles = files;
+                // Build folder structure
+                files.forEach(file => {
+                    const folderPath = file.path.split('/').slice(0, -1).join('/');
+                    if (folderPath) {
+                        folderStructure.add(folderPath);
+                    }
+                });
+                updateFolderDropdown();
                 renderFiles(files);
             })
             .catch(error => {
