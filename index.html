@@ -11,6 +11,7 @@
         const username = 'Low-Code-Cookbook';
         const repo = 'LaunchByLunch-CDN';
         const folder = 'assets';
+        const CDN_BASE_URL = 'https://cdn.launchbylunch.co/';
 
         fetch(`https://api.github.com/repos/${username}/${repo}/contents/${folder}`)
             .then(response => response.json())
@@ -18,7 +19,9 @@
                 const list = document.getElementById('file-list');
                 files.forEach(file => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<a href="${file.html_url}" target="_blank">${file.name}</a>`;
+                    // Create CDN URL by combining base URL with the file path
+                    const cdnUrl = `${CDN_BASE_URL}${file.path}`;
+                    li.innerHTML = `<a href="${cdnUrl}" target="_blank">${file.name}</a>`;
                     list.appendChild(li);
                 });
             })
