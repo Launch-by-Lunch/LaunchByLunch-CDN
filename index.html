@@ -14,12 +14,63 @@
         }
         
         body {
-            background-color: #f8f9fa;
+            background-color: var(--secondary-purple);
+            color: white;
+        }
+
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--secondary-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        #loginForm {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        #loginForm h2 {
+            color: var(--primary-purple);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        #loginForm .form-control {
+            background-color: white;
             color: #212529;
+            border: 1px solid #dee2e6;
+        }
+
+        #loginForm .form-control:focus {
+            background-color: white;
+            color: #212529;
+            border-color: var(--secondary-purple);
+            box-shadow: 0 0 0 0.25rem rgba(107, 44, 140, 0.25);
+        }
+
+        #loginForm .btn-primary {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        #mainContent {
+            display: none;
         }
 
         .navbar {
-            background-color: var(--secondary-purple) !important;
+            background-color: #3d214f !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .card {
@@ -58,10 +109,10 @@
         .search-container {
             position: sticky;
             top: 0;
-            background: #f8f9fa;
+            background: var(--secondary-purple);
             padding: 1.5rem 0;
             z-index: 1000;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .input-group {
@@ -69,27 +120,31 @@
         }
 
         .input-group-text {
-            background-color: var(--secondary-purple);
-            border-color: var(--secondary-purple);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
             color: white;
             padding: 0.75rem 1rem;
             font-size: 1.1rem;
         }
 
         .form-control {
-            border-color: var(--secondary-purple);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
             padding: 0.75rem 1rem;
             font-size: 1.1rem;
         }
 
         .form-control:focus {
-            border-color: var(--secondary-purple);
-            box-shadow: 0 0 0 0.25rem rgba(107, 44, 140, 0.25);
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+            color: white;
         }
 
         .form-control::placeholder {
             font-size: 1.1rem;
-            color: #6c757d;
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .btn-primary {
@@ -149,7 +204,7 @@
 
         .modal-url {
             word-break: break-all;
-            font-size: 0.875rem;
+            font-size: 1.1rem;
             flex: 1;
         }
 
@@ -169,56 +224,74 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-cloud-arrow-up-fill me-2"></i>
-                LaunchByLunch CDN Browser
-            </a>
-        </div>
-    </nav>
-
-    <div class="container py-4">
-        <div class="search-container mb-4">
-            <div class="input-group">
-                <span class="input-group-text">
-                    <i class="bi bi-search"></i>
-                </span>
-                <input type="text" id="searchInput" class="form-control" placeholder="Search files...">
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div id="loginForm">
+            <h2>Launch By Lunch CDN</h2>
+            <p class="text-muted text-center mb-4">What's the magic word?</p>
+            <div class="mb-3">
+                <input type="password" id="passwordInput" class="form-control" placeholder="Enter the magic word...">
+                <div id="passwordError" class="text-danger mt-2" style="display: none;">That's not the right magic word. Try again!</div>
             </div>
-        </div>
-
-        <div class="row" id="file-list">
-            <div class="col-12 text-center">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
+            <button onclick="checkPassword()" class="btn btn-lg btn-primary">Ready?</button>
         </div>
     </div>
 
-    <!-- Image Preview Modal -->
-    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="imageModalLabel">Image Preview</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Main Content -->
+    <div id="mainContent">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    Launch By Lunch Branding CDN
+                </a>
+                <button onclick="logout()" class="btn btn-outline-light ms-auto">
+                    <i class="bi bi-box-arrow-right me-1"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <div class="container py-4">
+            <div class="search-container mb-4">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search files...">
                 </div>
-                <div class="modal-body text-center">
-                    <img id="modalImage" class="modal-image mb-3" src="" alt="">
-                    <div class="modal-url-container">
-                        <div class="modal-url" id="modalUrl"></div>
-                        <button class="btn btn-sm btn-primary copy-btn" onclick="copyUrlToClipboard()">
-                            <i class="bi bi-clipboard me-1"></i> Copy URL
-                        </button>
+            </div>
+
+            <div class="row" id="file-list">
+                <div class="col-12 text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <a id="modalDownloadBtn" href="" class="btn btn-primary" target="_blank">
-                        <i class="bi bi-download me-1"></i> Download
-                    </a>
+            </div>
+        </div>
+
+        <!-- Image Preview Modal -->
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="imageModalLabel">Image Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img id="modalImage" class="modal-image mb-3" src="" alt="">
+                        <div class="modal-url-container">
+                            <div class="modal-url" id="modalUrl"></div>
+                            <button class="btn btn-sm btn-primary copy-btn" onclick="copyUrlToClipboard()">
+                                <i class="bi bi-clipboard me-1"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-lg btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <a id="modalDownloadBtn" href="" class="btn btn-lg btn-primary" target="_blank">
+                            <i class="bi bi-download me-1"></i> Open in a Tab
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -227,6 +300,55 @@
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Password protection
+        const CORRECT_PASSWORD = 'launch';
+        
+        function logout() {
+            localStorage.removeItem('cdnAuthenticated');
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('passwordInput').value = '';
+        }
+        
+        // Check if user is already authenticated
+        window.onload = function() {
+            const isAuthenticated = localStorage.getItem('cdnAuthenticated');
+            if (isAuthenticated === 'true') {
+                showMainContent();
+            }
+        }
+
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            const errorElement = document.getElementById('passwordError');
+            
+            if (password === CORRECT_PASSWORD) {
+                localStorage.setItem('cdnAuthenticated', 'true');
+                showMainContent();
+            } else {
+                errorElement.style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        }
+
+        function showMainContent() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+        }
+
+        // Add enter key support for password input
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // Clear error message when user starts typing
+        document.getElementById('passwordInput').addEventListener('input', function() {
+            document.getElementById('passwordError').style.display = 'none';
+        });
+
         const username = 'Low-Code-Cookbook';
         const repo = 'LaunchByLunch-CDN';
         const CDN_BASE_URL = 'https://cdn.launchbylunch.co/';
@@ -316,7 +438,7 @@
                             <h5 class="card-title text-truncate" title="${file.name}">${file.name}</h5>
                             <p class="card-text text-muted small mb-1">${fileSize}</p>
                             <p class="card-text text-muted small mb-2">${folderPath || 'Root'}</p>
-                            <a href="${cdnUrl}" class="btn btn-primary btn-sm w-100" target="_blank">
+                            <a href="${cdnUrl}" class="btn btn-primary btn-lg w-100" target="_blank">
                                 <i class="bi bi-download me-1"></i> Open
                             </a>
                         </div>
